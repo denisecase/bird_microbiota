@@ -1,5 +1,5 @@
-﻿      Site Layout  
-===============================================================================
+﻿Site Layout  
+=========
 
    Exploring Bird Microbiota Results   
    Kansas State University 
