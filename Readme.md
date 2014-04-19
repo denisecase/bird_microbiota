@@ -39,9 +39,18 @@ Resources
 
 The project uses:
 
+Data-Driven Documents (d3.js)
+http://d3js.org/
+
+Reusable-charts for d3.js (nvD3.js)
+http://nvd3.org/
+
 Leaflet and Plugins
 http://leafletjs.com/
 https://github.com/lvoogdt/Leaflet.awesome-markers
+
+BootLeaf
+https://github.com/bmcbride/bootleaf
 
 GINA Map Layers
 https://github.com/gina-alaska/gina-map-layers

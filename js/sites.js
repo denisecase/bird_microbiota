@@ -1,118 +1,174 @@
 // code for sites.html
 
+var map = L.map('map');
+var sidebar = L.control.sidebar('sidebar');
+var sidebar2 = L.control.sidebar('sidebar2');
+var popup = new L.Popup();
+
+function toggle1() {
+	sidebar.toggle();
+}
+function toggle2(){
+	sidebar2.toggle();
+}
+
+/* Larger screens get expanded layer control */
+if (document.body.clientWidth <= 767) {
+  var isCollapsed = true;
+} else {
+  var isCollapsed = false;
+}
+
+ 
+// See http://humangeo.github.io/leaflet-dvf/examples/js/markers.js.
+
+var createLayerGroup = function (name) {
+		var layerGroup = new L.LayerGroup();
+
+		map.addLayer(layerGroup);
+		layerControl.addOverlay(layerGroup, name);
+
+		return layerGroup;
+	};
+
+var addMarkers = function (layerGroupName, lat, lng, deltaLng, count, markerFunction, text) {
+
+		var layerGroup = createLayerGroup(layerGroupName);
+
+		var callout = new L.Callout(new L.LatLng(lat, lng), {
+			direction: L.CalloutLine.DIRECTION.NW,
+			lineStyle: L.CalloutLine.LINESTYLE.STRAIGHT,
+			numberOfSides: 3,
+			arrow: true,
+			color: '#C0C0C0',
+			fillColor: '#C0C0C0',
+			position: new L.Point(-60, 0),
+			size: new L.Point(40, 0),
+			icon: new L.DivIcon({
+				iconSize: new L.Point(80, 50),
+				html: '<div>' + layerGroupName + '</div>',
+				className: 'callout-text'
+			})
+		});
+
+		layerGroup.addLayer(callout);
+
+		for (var i = 0; i < count; ++i) {
+			layerGroup.addLayer(markerFunction(new L.LatLng(lat, lng + i * deltaLng), i));
+		}
+	};
+
 function initMap() {
 
-    // FORMATTING ELEMENTS ===================================================
+	// FORMATTING ELEMENTS ===================================================
 
-    // node layer formatting
+	// node layer formatting
 
-    var nodeColor = 'black';
-    var nodeOpacity = 1.0;
-    var nodeFillOpacity = 1.0;
-    var nodeRadius = 2;
-    var nodeLineWeight = 1;
-    
-    var polyline_options = {
-        color: nodeColor,
-        opacity: nodeOpacity,
-        weight: nodeLineWeight, // in pixels
-        smoothFactor: 1.0
-    };
+	var nodeColor = 'black';
+	var nodeOpacity = 1.0;
+	var nodeFillOpacity = 1.0;
+	var nodeRadius = 4;
+	var nodeLineWeight = 2;
+	
+	var polyline_options = {
+		color: nodeColor,
+		opacity: nodeOpacity,
+		weight: nodeLineWeight, // in pixels
+		smoothFactor: 1.0
+	};
   
-    // marker 1 formatting
+	// marker 1 formatting
 
-    var m1Color = 'red';
-    var m1Opacity = 1.0;
-    var m1FillOpacity = 0.7;
-    var m1Radius = 9;
-    var m1Marker = L.AwesomeMarkers.icon({
-        icon: 'group',
-        color: 'red',
-        iconColor: 'white'
-    });
+	var m1Color = 'red';
+	var m1Opacity = 1.0;
+	var m1FillOpacity = 0.7;
+	var m1Radius = 9;
+	var m1Marker = L.AwesomeMarkers.icon({
+		icon: 'globe',
+		color: 'red',
+		iconColor: 'white'
+	});
+ 
+	// marker 2 formatting
 
-    // marker 2 formatting
+	var m2Color = 'green';
+	var m2Opacity = 0.4;
+	var m2FillOpacity = 0.4;
+	var m2Radius = 8;
+	var m2LineWeight = 2;
+	var m2Marker = L.AwesomeMarkers.icon({
+		icon: 'twitter',
+		color: 'green',
+		iconColor: 'white'
+	})
+	var m2Voffset = 0.4;// 0.0001;
+	var m2Hoffset = 0.1; //m2Voffset*.05;
+	
 
-    var m2Color = 'green';
-    var m2Opacity = 0.4;
-    var m2FillOpacity = 0.4;
-    var m2Radius = 8;
-    var m2LineWeight = 2;
-    var m2Marker = L.AwesomeMarkers.icon({
-        icon: 'group',
-        color: 'green',
-        iconColor: 'white'
-    })
-    var m2Voffset = 0.0;// 0.0001;
-    var m2Hoffset = 0.000001; //m2Voffset*.05;
+	 // GET DATA ===========================================================
 
-     // GET DATA ===========================================================
+	 var nodes = getExistingNodes();
+	 var markers1 = getExistingMarkers1();
+	 var markers2 = getExistingMarkers2();
 
-     var nodes = getExistingNodes();
-     var markers1 = getExistingMarkers1();
-     var markers2 = getExistingMarkers2();
+	 nodeLayerGroup = new L.layerGroup();
+	 m1LayerGroup = new L.layerGroup();
+	 m2LayerGroup = new L.layerGroup();
 
-     nodeLayerGroup = new L.layerGroup();
-     m1LayerGroup = new L.layerGroup();
-     m2LayerGroup = new L.layerGroup();
-
-    // CREATE GINA LAYERS  ==============================================
-    // Examples can be found at http://gina-alaska.github.io/gina-map-layers
-    // https://github.com/gina-alaska/gina-map-layers
-    
-    var bestLayerGroup = new L.LayerGroup();
-    bestLayerGroup.name = "Best";
-            
-    var topLayerGroup = new L.LayerGroup();
-    topLayerGroup.name = "Top";
-        
-    var orthoLayerGroup = new L.LayerGroup();
-    orthoLayerGroup.name = "Ortho";
-
-    var logNodeLayer  = new L.layerGroup();
-    logNodeLayer.name = "Logical Base Layer";
-   
-
-     // CREATE GEOGRAPHIC LAYER  =============================================
+	// CREATE GINA LAYERS  ==============================================
+	// Examples can be found at http://gina-alaska.github.io/gina-map-layers
+	// https://github.com/gina-alaska/gina-map-layers
+	
+	var bestLayerGroup = new L.LayerGroup();
+	bestLayerGroup.name = "Best";
+			
+	var topLayerGroup = new L.LayerGroup();
+	topLayerGroup.name = "Top";
+		
+	var orthoLayerGroup = new L.LayerGroup();
+	orthoLayerGroup.name = "Ortho";
+ 
+	 // CREATE GEOGRAPHIC LAYER  =============================================
 
 	var gmap_layer = new L.Google('ROADMAP');
-    gmap_layer.name = "Geographical Base Layer";
-    var geoNodeLayer = new L.layerGroup();
-    var getMarkerLayer1 = new L.layerGroup();
-    var getMarkerLayer1   = new L.layerGroup();
+	gmap_layer.name = "Geographical Base Layer";
+	
+	var geoNodeLayer = new L.layerGroup();
+	var geoMarkerLayer1 = new L.layerGroup();
+	var geoMarkerLayer2   = new L.layerGroup();  
 
-    // add existing site nodes
+	// add site nodes
 
-    for (i=0; i< nodes.length; i++)
-    {
-        var nodeG = L.circle(([nodes[i].nodeGeoLat, nodes[i].nodeGeoLng]), nodeRadius, {color: nodeColor, opacity: nodeOpacity,fillColor: nodeColor, fillOpacity: nodeFillOpacity, tag:i});
-       nodeG.bindPopup('Showing live data for site ' +  nodes[i].nodeID +':'+ nodes[i].desc+ '.').on('click', function() {show_chart( nodes[i].nodeID ); });
-        nodeG.bindLabel(' ' +  nodes[i].nodeID  +':'+ nodes[i].desc + ' ', { noHide: true });
-        nodeG.addTo(geoNodeLayer);
-    }
+	for (i=0; i< nodes.length; i++)
+	{
+		var nodeG = L.circle(([nodes[i].nodeGeoLat, nodes[i].nodeGeoLng]), nodeRadius, {color: nodeColor, opacity: nodeOpacity,fillColor: nodeColor, fillOpacity: nodeFillOpacity, tag:i+1});
+		nodeG.bindPopup('Node ' +  nodes[i].nodeID +':'+ nodes[i].desc + '.').on('click', function() {show_chart( nodes[i].nodeID ); });
+		nodeG.bindLabel('Location ' +  i  +':  '+ nodes[i].desc + ' ', { noHide: true });
+		nodeG.addTo(geoNodeLayer);
+	}
 
-    // add existing markers1
+	// add markers1
 
-      for (i=0; i< markers1.length; i++)
-      {
-        var m = L.marker([  nodes[i].nodeGeoLat, nodes[i].nodeGeoLng], {icon: m1Marker, tag:i});
-        m.bindPopup('Showing info for site ' +  markers1[i].abbrev +'.').on('dblclick', function() {show_chart(i+1); });
-        m.bindLabel('' +markers1[i].abbrev + '', { noHide: true });
-        m.addTo(getMarkerLayer1);
-      }
+	for (i=0; i< markers1.length; i++)
+	{
+		var m =  L.marker([  nodes[i].nodeGeoLat, nodes[i].nodeGeoLng], {icon: m1Marker, tag:i+1});
+		m.bindPopup('  Site ' +  markers1[i].abbrev +':  <br> '+ nodes[i].desc+ '.  ').on('dblclick', function() {show_chart(i+1); });
+		m.bindLabel('' + markers1[i].abbrev + '', { noHide: true });
+		m.addTo(geoMarkerLayer1);
+	}
 
-        // add existing markers2
+		// add markers2
 
-      for (i=0; i< markers2.length; i++)
-      {
-          var id = markers2[i].id;
-          var n = L.marker([  nodes[i].nodeGeoLat +m2Hoffset, nodes[i].nodeGeoLng + m2Voffset], {icon: m2Marker, tag:id});
-          n.bindPopup('Showing site info for '+ markers2[i].name +'.').on('dblclick', function() {show_chart(i+1); });
-          n.bindLabel('' + markers2[i].abbrev + '', {noHide: true  });
-          n.addTo(getMarkerLayer1);
-      }
+	  for (i=0; i< markers2.length; i++)
+	  {
+		  var id = markers2[i].id;
+		  var n = L.marker([  nodes[i].nodeGeoLat +m2Hoffset, nodes[i].nodeGeoLng + m2Voffset], {icon: m2Marker, tag:id});
+		  n.bindPopup('Samples obtained: <br>' + sampleCount[0]+'/'+ sampleTotalCount + ' or ' + Math.round(sampleCount[i]/sampleTotalCount*100,1) +'%<br> from <br> Site ' + id + ':  '+ nodes[i].desc ).on('dblclick', function() {show_chart(i+1); });
+		  n.bindLabel('' + markers2[i].abbrev + '', {noHide: true  });
+		  n.addTo(geoMarkerLayer2);
+	  }
 
-        // SET UP MAP =========================================================
+		// SET UP MAP =========================================================
 
 		var cloudmadeUrl = 'http://{s}.tile.cloudmade.com/{key}{styleId}/{tileSize}/{zoom}/{x}/{y}.png';
 		var	cloudmadeAttribution = 'Map data &copy; 2013 OpenStreetMap contributors, Imagery &copy; 2013 CloudMade';
@@ -120,33 +176,56 @@ function initMap() {
 		var cloudmadeStyleID = 22677;
 		var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 		var osmAttrib='Map data � OpenStreetMap contributors';
-		var demopt = new L.LatLng(60.00000  , -140.00000);
-		var geoCenterPoint = new L.LatLng(60.00000  , -140.00000);
+		var geoCenterPoint = new L.LatLng(70.00000  , -140.00000);
 
 		var geoTileLayer  = L.tileLayer(cloudmadeUrl, {
 			styleId: cloudmadeStyleID, 
 			attribution: cloudmadeAttribution,
 			key: cloudmadeAPIKEY,
 			detectRetina: true,
-			zoom: 4,
+			zoom: 5,
 			minZoom: 2,
 			maxZoom: 20,
 			tileSize: 256,
 			center: geoCenterPoint
 		});
 	
-		m1LayerGroup.addLayer(getMarkerLayer1);
-		m2LayerGroup.addLayer(getMarkerLayer1);
-
-		var map = L.map('map',{
+		m1LayerGroup.addLayer(geoMarkerLayer1);
+		m2LayerGroup.addLayer(geoMarkerLayer2);
+		
+		
+		map = L.map('map',{
 			center: geoCenterPoint,
-			zoom: 4,
+			zoom: 3,
 			minZoom: 2,
 			maxZoom: 20,
+			scrollWheelZoom: false,
+			zoomControlPosition: 'bottomleft',
 			layers: [ geoNodeLayer, bestLayerGroup, orthoLayerGroup, topLayerGroup, m1LayerGroup, m2LayerGroup],
 			dragging: true,
 			doubleClickZoom: false
 		});
+		
+		sidebar = L.control.sidebar('sidebar', {
+			closeButton: true,
+			position: 'left'
+		}); 
+		 
+		sidebar2 = L.control.sidebar('sidebar2', {
+		closeButton: true,
+		position: 'right'
+		}); 
+		
+		map.addControl(sidebar);
+		map.addControl(sidebar2);
+	
+		 setTimeout(function () {
+			sidebar.hide();
+		}, 2500);
+
+		setTimeout(function () {
+			sidebar2.hide();
+		}, 2500);
 		
 		 
 //==============================================================================
@@ -161,62 +240,44 @@ function initMap() {
 		};
 
 		var overlays = {
-			"First Markers": m1LayerGroup,
-			"Second Markers": m2LayerGroup
+			"Sites": m1LayerGroup,
+			"Bird Samples": m2LayerGroup
 		};
 
-        // returns e, the layer object
+		// returns e, the layer object
 		map.on('baselayerchange', function (e) {
 			if (e.layer.name == gmap_layer.name) {
 	            map.layers = [nodeLayerGroup, m1LayerGroup, m2LayerGroup];
 			}
 			else if (e.layer.name == bestLayerGroup.name) {
-	            map.layers = [bestLayerGroup, m1LayerGroup, m2LayerGroup];
+	            map.layers = [bestLayerGroup,  m1LayerGroup, m2LayerGroup];
 			}
 			else if (e.layer.name == orthoLayerGroup.name) {
-	            map.layers = [orthoLayerGroup, m1LayerGroup, m2LayerGroup];
+	            map.layers = [orthoLayerGroup,  m1LayerGroup, m2LayerGroup];
 			}
 			else if (e.layer.name == topLayerGroup.name) {
-	            map.layers = [topLayerGroup, m1LayerGroup, m2LayerGroup];
+	            map.layers = [topLayerGroup,  m1LayerGroup, m2LayerGroup];
 			}
 			
 		});
-
-		
-		// show static labels .........................STATIC LABELS NOT WORKING
-		nodeLayerGroup.eachLayer(function (layer) {
-				 layer.showLabel();
-		});
-		//m1LayerGroup.eachLayer(function (marker) {
-		//	marker.showLabel();
-		//});
-		//m2LayerGroup.eachLayer(function (layer) {
-		//		 layer.showLabel();
-		//});
-
+	
 		// Edit control functionality........................................
 		
 		// Initialize the FeatureGroup to store editable layers
 		var editableLayers = new L.FeatureGroup();
-		map.addLayer(editableLayers);
-
-
-	
-      var layers = Gina.Layers.find('TILE.EPSG::3857.*');
-      layers['GINA Best Data Layer (BDL)'].addTo(map);
-      L.control.layers(layers, overlays, { collapsed: false }).addTo(map);
-    //  	L.control.layers(baseLayers, overlays, {collapsed:false}).addTo(map);
-		
-		var popup = L.popup();
+		//map.addLayer(editableLayers);
+	  
+	  var layers = Gina.Layers.find('TILE.EPSG::3857.*');
+	  layers['GINA Best Data Layer (BDL)'].addTo(map);
+	  geoNodeLayer.addTo(map);
+	  L.control.layers(layers, overlays, { collapsed: false }).addTo(map);
 	
 }
-
 // end initmap..................................................................
 		
 function show_chart(i){ 
 	 // jump to chart given name that appears on the layout (e.g. 44)
 	// window.location="http://localhost/test/index.php?node=" + i;
-
 }
 
 function getExistingNodes(){
@@ -238,17 +299,17 @@ function getExistingMarkers2(){
 
 function NodeRec() {
 	this.nodeid = 0;
-    this.abbrev= 'S1';
-    this.desc= 'Site Name';
+	this.abbrev= 'S1';
+	this.desc= 'Site Name';
 	this.externalID = 0;
 	this.nodeGeoLat = 65.0000000;	
 	this.nodeGeoLng = -140.000000;
 }
 function NodeRec(a1,a2,a3,a4,a5,a6) {
-    this.id     =(a1 != undefined) ? a1 : 0;
-    this.abbrev =(a2 != undefined) ? a2 : 'abbrev';
-    this.desc   =(a3 != undefined) ? a3 : 'desc';
- 	this.externalID =(a4 != undefined) ? a4 : 0;
+	this.id     =(a1 != undefined) ? a1 : 0;
+	this.abbrev =(a2 != undefined) ? a2 : 'abbrev';
+	this.desc   =(a3 != undefined) ? a3 : 'desc';
+	this.externalID =(a4 != undefined) ? a4 : 0;
 	this.nodeGeoLat =(a5 != undefined) ? a5 : 39.18280500;
 	this.nodeGeoLng =(a6 != undefined) ? a6 : -96.57141600;
 }
@@ -269,16 +330,16 @@ function getNodeData(){
 }
 
 function Marker1Rec() {
-    this.id = 1;   
-    this.abbrev= 'S1';
-    this.name= 'Site 1 Name';
+	this.id = 1;   
+	this.abbrev= 'S1';
+	this.name= 'Site 1 Name';
 	this.externalID = 0;
 	this.nodeid = 0;
 }
 function Marker1Rec(a1,a2,a3,a4,a5) {
-    this.id     =(a1 != undefined) ? a1 : 0;
-    this.abbrev =(a2 != undefined) ? a2 : 'abbrev';
-    this.name   =(a3 != undefined) ? a3 : 'desc';
+	this.id     =(a1 != undefined) ? a1 : 0;
+	this.abbrev =(a2 != undefined) ? a2 : 'abbrev';
+	this.name   =(a3 != undefined) ? a3 : 'desc';
 	this.externalID =(a4 != undefined) ? a4 : 0;
 	this.nodeid   =(a5 != undefined) ? a5 : 0;
 }
@@ -299,17 +360,17 @@ function getMarkerData1(){
 }
 	
 function Marker2Rec() {
-    this.id = 1;   
-    this.abbrev= 'S1';
-    this.name= 'Site 1 Name';
+	this.id = 1;   
+	this.abbrev= 'S1';
+	this.name= 'Site 1 Name';
 	this.externalID = 0;
 	this.nodeid = 0;
 }
 function Marker2Rec(a1,a2,a3,a4, a5) {
-    this.id     =(a1 != undefined) ? a1 : 0;
-    this.abbrev =(a2 != undefined) ? a2 : '';
-    this.name   =(a3 != undefined) ? a3 : '';
-    this.externalID =(a4 != undefined) ? a4 : 0;
+	this.id     =(a1 != undefined) ? a1 : 0;
+	this.abbrev =(a2 != undefined) ? a2 : '';
+	this.name   =(a3 != undefined) ? a3 : '';
+	this.externalID =(a4 != undefined) ? a4 : 0;
 	this.nodeid   =(a5 != undefined) ? a5 : 0;
   
 }
@@ -327,9 +388,9 @@ function getMarkerData2(){
 		new Marker2Rec( 9,'S9' ,'Churchill, Canada'              ,   9,  9)
 	];
 	return r;
+}
 
-}
-function onMapClick(e) {
-	// don't delete - the following may be used to get map coordinates. 
-	// popup.setLatLng(e.latlng).setContent("You clicked the map at " + e.latlng.toString()).openOn(map);
-}
+
+
+
+

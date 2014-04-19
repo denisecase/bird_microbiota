@@ -1,56 +1,11 @@
-html, body , #map{
+html, body, #map {
   height: 100%;
   width: 100%;
   overflow: hidden;
 }
-
 body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   padding-top: 50px;
 }
-
- #sidebar, #sidebar2 {
-	padding: 24px;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-	background-color: #fffaf0;
-} 
- 
-
-.chart div {
-  font: 10px sans-serif;
-  background-color: steelblue;
-  text-align: right;
-  padding: 5px;
-  margin: 10px;
-  color: white;
-}
- 
-
-path.slice{
-	stroke-width:2px;
-}
-polyline{
-	opacity: .3;
-	stroke: black;
-	stroke-width: 2px;
-	fill: none;
-} 
-svg text.percent{
-	fill:white;
-	text-anchor:middle;
-	font-size:12px;
-}
-
-.callout-text {
-	color: white;
-	padding-left: 4px;
-}
-	  
-.slice text {
-	font-size: 14pt;
-	font-family: Arial;
-}  
-
 input[type="radio"], input[type="checkbox"] {
   margin: 0;
 }
@@ -62,7 +17,7 @@ input[type="radio"], input[type="checkbox"] {
   left: 50%;
   margin: -10px 0 0 -110px;
   z-index: 20001;
-}       
+}
 .leaflet-control-layers label {
   font-weight: normal;
   margin-bottom: 0px;
@@ -132,26 +87,33 @@ input[type="radio"], input[type="checkbox"] {
 .leaflet-popup-content-wrapper {
   border-radius: 5px;
 }
-
+.leaflet-sidebar {
+  z-index: 1020;
+}
+.leaflet-sidebar .close {
+  right: 0px;
+  top: 5px;
+  background: transparent;
+}
 @media (max-width: 992px) {
   .navbar .navbar-brand {
-	font-size: 18px;
+    font-size: 18px;
   }
 }
 @media (max-width: 767px){
   .url-break {
-	word-break: break-all;
-	word-break: break-word;
-	-webkit-hyphens: auto;
-	hyphens: auto;
+    word-break: break-all;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    hyphens: auto;
   }
 }
 /* Print Handling */
 @media print {
   .navbar {
-	display: none !important;
+    display: none !important;
   }
   .leaflet-control-container {
-	display: none !important;
+    display: none !important;
   }
 }
