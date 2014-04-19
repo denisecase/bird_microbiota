@@ -176,7 +176,7 @@ function initMap() {
 		var cloudmadeStyleID = 22677;
 		var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 		var osmAttrib='Map data � OpenStreetMap contributors';
-		var geoCenterPoint = new L.LatLng(70.00000  , -140.00000);
+		var geoCenterPoint = new L.LatLng(58.00000  , -140.00000);
 
 		var geoTileLayer  = L.tileLayer(cloudmadeUrl, {
 			styleId: cloudmadeStyleID, 
